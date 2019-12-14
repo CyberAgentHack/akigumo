@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Home from '../views/Home.vue';
+import Books from '@/views/Books.vue';
 import Viewer from '@/views/Viewer.vue';
 
 Vue.use(VueRouter);
@@ -8,8 +8,8 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: Home,
+    name: 'books',
+    component: Books,
   },
   {
     path: '/about',
