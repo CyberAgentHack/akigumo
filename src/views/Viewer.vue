@@ -44,7 +44,6 @@ export default {
   },
   methods: {
     onMouseDown(e, index) {
-      console.log(e);
       this.isZoom = true;
       this.clickedIndex = index;
       this.beforeY = window.pageYOffset;
