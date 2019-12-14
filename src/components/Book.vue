@@ -3,7 +3,24 @@
     <div class="info-wrapper">
       <div class="title"> {{ title }}</div>
       <div class="sub-info">{{ author }}&nbsp;/&nbsp;{{ publisher }}</div>
-
+      <div class="link-button">
+        <router-link :to="`/series/${seriesId}`">詳細</router-link>
+      </div>
+      <div class="link-button">
+        <router-link :to="`/series/${seriesId}/books/${getFirstBookId}/viewer`">
+          1話を読む
+        </router-link>
+      </div>
+      <div class="link-button">
+        <router-link :to="`/series/${seriesId}/books/${nextNum}/viewer`">
+          続き({{ nextNum }}話)を読む
+        </router-link>
+      </div>
+      <div class="link-button">
+        <router-link :to="`/series/${seriesId}/books/${getLeatestBookId}/viewer`">
+          最新話を読む
+        </router-link>
+      </div>
     </div>
     <div class="thumbnail-wrapper">
       <img v-lazy="thumbnailUrl" />
@@ -23,10 +40,30 @@ Vue.use(VueLazyload, {
 export default {
   name: 'book',
   props: {
+    seriesId: String,
     title: String,
     author: String,
     publisher: String,
     thumbnailUrl: String,
+    books: Object,
+  },
+  data() {
+    return {
+      nextNum: 2,
+    };
+  },
+  computed: {
+    getBooks() {
+      return this.books[this.seriesId];
+    },
+    getFirstBookId() {
+      const books = this.getBooks;
+      return books ? books[0].id : '';
+    },
+    getLeatestBookId() {
+      const books = this.getBooks;
+      return books ? books[books.length - 1].id : '';
+    },
   },
 };
 </script>
@@ -34,7 +71,7 @@ export default {
 <style>
 .book {
   width: 300px;
-  height: 150px;
+  min-height: 150px;
   display: flex;
   align-items: center;
   margin: 10px;
@@ -44,6 +81,7 @@ export default {
 
 .info-wrapper {
   flex-grow: 2;
+  padding: 5px;
 }
 
 .thumbnail-wrapper {
@@ -53,6 +91,11 @@ export default {
 
 .title {
   font-size: 1.2em;
+}
+
+.link-button > a {
+  display: block;
+  margin: 10px 5px;
 }
 
 img {
