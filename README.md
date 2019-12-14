@@ -1,4 +1,7 @@
-# akigumo
+# Akigumo
+簡易漫画リーダー
+
+![Akigumo](./akigumo.png)
 
 ## Project setup
 ```
