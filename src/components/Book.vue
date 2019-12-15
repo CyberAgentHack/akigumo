@@ -12,8 +12,8 @@
         </router-link>
       </div>
       <div class="link-button">
-        <router-link :to="`/series/${seriesId}/books/${nextNum}/viewer`">
-          続き({{ nextNum }}話)を読む
+        <router-link :to="`/series/${seriesId}/books/${getNextBookId}/viewer`">
+          続き({{ getNextNum }}話)を読む
         </router-link>
       </div>
       <div class="link-button">
@@ -47,11 +47,6 @@ export default {
     thumbnailUrl: String,
     books: Object,
   },
-  data() {
-    return {
-      nextNum: 2,
-    };
-  },
   computed: {
     getBooks() {
       return this.books[this.seriesId];
@@ -64,11 +59,19 @@ export default {
       const books = this.getBooks;
       return books ? books[books.length - 1].id : '';
     },
+    getNextNum() {
+      return this.$store.state.nextStory[this.seriesId]
+        ? this.$store.state.nextStory[this.seriesId].index + 1 : 1;
+    },
+    getNextBookId() {
+      return this.$store.state.nextStory[this.seriesId]
+        ? this.$store.state.nextStory[this.seriesId].bookId : '';
+    },
   },
 };
 </script>
 
-<style>
+<style scoped>
 .book {
   width: 300px;
   min-height: 150px;
