@@ -137,7 +137,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .viewer {
   width: 100vw;
   background-color: rgba(0, 0, 0, 0.8);
@@ -183,6 +183,10 @@ img {
 
 .page-count, .link {
   color: white;
+}
+
+.link {
+  padding-left: 10px;
 }
 
 @media screen and (max-width: 1024px) {

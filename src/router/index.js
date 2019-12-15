@@ -3,6 +3,8 @@ import VueRouter from 'vue-router';
 import Main from '@/views/Main.vue';
 import Books from '@/views/Books.vue';
 import Viewer from '@/views/Viewer.vue';
+import Setting from '@/views/Setting.vue';
+import Detail from '@/views/Detail.vue';
 
 Vue.use(VueRouter);
 
@@ -25,7 +27,11 @@ const routes = [
       {
         path: '/series/:id',
         name: 'book',
-        component: Books,
+        component: Detail,
+      },
+      {
+        path: '/setting',
+        component: Setting,
       },
     ],
   },

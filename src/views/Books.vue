@@ -48,7 +48,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .books {
   display: flex;
   flex-wrap: wrap;

@@ -71,7 +71,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .book {
   width: 300px;
   min-height: 150px;

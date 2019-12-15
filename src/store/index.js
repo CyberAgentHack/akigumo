@@ -7,6 +7,7 @@ export default new Vuex.Store({
   state: {
     isRegistered: false,
     nextStory: {},
+    scrollType: 0,
   },
   mutations: {
     save(state) {
@@ -24,6 +25,9 @@ export default new Vuex.Store({
         bookId: val.bookId,
       };
     },
+    setScrollType(state, type) {
+      state.scrollType = type;
+    },
   },
   actions: {
     doSave({ commit }) {
@@ -34,6 +38,9 @@ export default new Vuex.Store({
     },
     doSetNextStory({ commit }, val) {
       commit('setNextStory', val);
+    },
+    doSetScrollType({ commit }, type) {
+      commit('setScrollType', type);
     },
   },
   modules: {
