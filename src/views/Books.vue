@@ -27,12 +27,22 @@ export default {
     seriesApi.getAllSeries()
       .then((res) => {
         this.seriesList = res.data.data;
+        const { nextStory } = this.$store.state;
         this.seriesList.forEach((series) => {
           seriesApi.getSeriesById(series.seriesId)
             .then((seriesRes) => {
               this.$set(this.books, series.seriesId, seriesRes.data.books);
+              if (!Object.prototype.hasOwnProperty.call(nextStory, series.seriesId)) {
+                this.$store.dispatch('doSetNextStory', {
+                  seriesId: series.seriesId,
+                  index: 0,
+                  bookId: seriesRes.data.books[0].id,
+                });
+              }
             });
         });
+        // localStorageに保存
+        this.$store.dispatch('doSave');
       });
   },
 };

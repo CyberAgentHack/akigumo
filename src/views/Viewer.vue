@@ -1,11 +1,11 @@
 <template>
   <div class="viewer-wrapper">
     <div class="viewer-header">
-      <router-link to="/series">&lt;作品一覧へ</router-link>
+      <router-link class="link" to="/series">&lt;作品一覧へ</router-link>
       <div class="page-count">
         {{ title }} ( {{ currentPage }} / {{ getPageCount }} )
       </div>
-      <router-link to="/series">次の話&gt;</router-link>
+      <div></div>
     </div>
     <div class="viewer">
       <div class="img-wrapper" :class="{zoom: isZoom && (clickedIndex === index)}"
@@ -22,6 +22,7 @@
 <script>
 import Vue from 'vue';
 import VueLazyload from 'vue-lazyload';
+import seriesApi from '@/modules/api/seriesApi';
 import bookApi from '@/modules/api/bookApi';
 
 Vue.use(VueLazyload, {
@@ -35,23 +36,36 @@ export default {
   name: 'viewer',
   data() {
     return {
+      seriesId: '',
       title: '',
       pages: [],
+      books: [],
       beforeY: null,
       clickedIndex: null,
       isZoom: false,
       controllerWrapperHeight: null,
       currentPage: 1,
+      isRead: false,
     };
   },
   created() {
     const id = this.$route.params.bookId;
     bookApi.getBookById(id)
       .then((res) => {
-        const { title, imageData, height } = res.data;
+        const {
+          title,
+          seriesId,
+          imageData,
+          height,
+        } = res.data;
         this.pages = imageData.map(image => image.imageUrl);
         this.title = title;
         this.controllerWrapperHeight = Math.floor(height / 3) * 2;
+        this.seriesId = seriesId;
+        return seriesApi.getSeriesById(seriesId);
+      })
+      .then((res) => {
+        this.books = res.data.books;
       });
   },
   updated() {
@@ -62,6 +76,17 @@ export default {
           return;
         }
         this.currentPage = Number(entry.target.getAttribute('imgindex'));
+        // つづきを更新
+        if (this.currentPage === this.pages.length && !this.isRead) {
+          const currentStory = this.$store.state.nextStory[this.seriesId];
+          const index = currentStory.index !== this.books.length - 1 ? currentStory.index + 1 : 0;
+          this.$store.dispatch('doSetNextStory', {
+            seriesId: this.seriesId,
+            index,
+            bookId: this.books[index].id,
+          });
+          this.isRead = true;
+        }
       });
     });
     targets.forEach(target => observer.observe(target));
@@ -77,11 +102,37 @@ export default {
       this.isZoom = false;
       window.scrollTo({ top: this.beforeY });
     },
+    updateNextStory() {
+      if (!this.isRead) {
+        const currentStory = this.$store.state.nextStory[this.seriesId];
+        const index = currentStory.index !== this.books.length - 1 ? currentStory.index + 1 : 0;
+        this.$store.dispatch('doSetNextStory', {
+          seriesId: this.seriesId,
+          index,
+          bookId: this.books[index].id,
+        });
+        this.isRead = true;
+      }
+    },
   },
   computed: {
     getPageCount() {
       return this.pages.length;
     },
+    getNextStoryUrl() {
+      const currentStory = this.$store.state.nextStory[this.seriesId];
+      if (!currentStory) {
+        return '';
+      }
+      const index = currentStory.index !== this.books.length - 1 ? currentStory.index + 1 : 0;
+      if (!this.books[index]) {
+        return '';
+      }
+      return `/series/${this.seriesId}/books/${this.books[index].id}/viewer`;
+    },
+  },
+  beforeRouteUpdate(to, from, next) {
+    next();
   },
 };
 </script>
@@ -130,7 +181,7 @@ img {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
-.page-count {
+.page-count, .link {
   color: white;
 }
 
