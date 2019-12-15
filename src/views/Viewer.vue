@@ -8,13 +8,29 @@
       <div></div>
     </div>
     <div class="viewer">
-      <div class="img-wrapper" :class="{zoom: isZoom && (clickedIndex === index)}"
-        @mousedown="onMouseDown($event, index)" @mouseup="onMouseUp"
-        v-for="(page, index) in pages" :key = "'page-' + index" :imgindex="index + 1">
-        <img v-lazy="page" :key="'img-' + index" />
+      <div class="vertical-scroll" v-if="isVerticalScroll">
+        <div class="img-wrapper-v" :class="{zoom: isZoom && (clickedIndex === index)}"
+          @mousedown="onMouseDown($event, index)" @mouseup="onMouseUp"
+          v-for="(page, index) in pages" :key = "'page-' + index" :imgindex="index + 1">
+          <img v-lazy="page" :key="'img-' + index" />
+        </div>
+      </div>
+      <div class="horizon-scroll" v-else>
+        <div class="img-wrapper-h" :class="{zoom: isZoom}"
+          @mousedown="onMouseDown($event)" @mouseup="onMouseUp"
+          :imgindex="currentPage - 1">
+          <img v-lazy="getCurrentPage" />
+        </div>
       </div>
     </div>
-    <div class="controller-wapper" :style="{height: controllerWrapperHeight + 'px'}">
+    <div v-if="isVerticalScroll" class="controller-wapper"
+      :style="{height: controllerWrapperHeight + 'px'}">
+    </div>
+    <div v-if="!isVerticalScroll">
+      <div class="next" @click="nextPage()">
+      </div>
+      <div class="prev" @click="prevPage()">
+      </div>
     </div>
   </div>
 </template>
@@ -46,9 +62,11 @@ export default {
       controllerWrapperHeight: null,
       currentPage: 1,
       isRead: false,
+      isVerticalScroll: true,
     };
   },
   created() {
+    this.isVerticalScroll = this.$store.state.scrollType === 0;
     const id = this.$route.params.bookId;
     bookApi.getBookById(id)
       .then((res) => {
@@ -69,7 +87,11 @@ export default {
       });
   },
   updated() {
-    const targets = document.querySelectorAll('.img-wrapper');
+    if (!this.isVerticalScroll) {
+      return;
+    }
+    const targetClass = this.isVerticalScroll ? '.img-wrapper-v' : '.img-wrapper-h';
+    const targets = document.querySelectorAll(targetClass);
     observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.intersectionRatio <= 0) {
@@ -114,6 +136,21 @@ export default {
         this.isRead = true;
       }
     },
+    nextPage() {
+      if (this.currentPage === this.pages.length) {
+        return;
+      }
+      this.currentPage += 1;
+      if (this.currentPage === this.pages.length) {
+        this.updateNextStory();
+      }
+    },
+    prevPage() {
+      if (this.currentPage === 1) {
+        return;
+      }
+      this.currentPage -= 1;
+    },
   },
   computed: {
     getPageCount() {
@@ -130,6 +167,9 @@ export default {
       }
       return `/series/${this.seriesId}/books/${this.books[index].id}/viewer`;
     },
+    getCurrentPage() {
+      return this.pages[this.currentPage - 1] ? this.pages[this.currentPage - 1] : '';
+    },
   },
   beforeRouteUpdate(to, from, next) {
     next();
@@ -138,7 +178,7 @@ export default {
 </script>
 
 <style scoped>
-.viewer {
+.viewer, .vertical-scroll {
   width: 100vw;
   background-color: rgba(0, 0, 0, 0.8);
   display: flex;
@@ -150,22 +190,34 @@ export default {
   width: 100vw;
   height: 50px;
   display: flex;
+  z-index: 1000;
   justify-content: space-between;
   align-items: center;
   position: fixed;
   background-color: rgba(0, 0, 0, 0.9);
 }
 
-.img-wrapper {
+.img-wrapper-v {
   width: 60%;
 }
 
+.img-wrapper-h {
+  margin-top: 50px;
+  height: calc(100vh - 50px);
+}
+
 .zoom {
+  height: auto;
+  width: 100vw;
+}
+
+.img-wrapper-v > img {
   width: 100%;
 }
 
-img {
-  width: 100%;
+.img-wrapper-h > img {
+  height: 100%;
+  width: auto;
 }
 
 .v-lazy-image {
@@ -187,6 +239,32 @@ img {
 
 .link {
   padding-left: 10px;
+}
+
+.next {
+  width: 20vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0);
+  position: fixed;
+  left: 0;
+  top: 0;
+}
+
+.next:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+.prev {
+  width: 20vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0);
+  position: fixed;
+  right: 0;
+  top: 0;
+}
+
+.prev:hover {
+  background-color: rgba(0, 0, 0, 0.9);
 }
 
 @media screen and (max-width: 1024px) {

@@ -5,7 +5,7 @@
       <input type="radio" v-model.number="scrollType" value="0" /> 縦スクロール
     </label>
     <label>
-      <input type="radio" v-model.number="scrollType" value="1" /> 縦スクロール
+      <input type="radio" v-model.number="scrollType" value="1" /> 横スクロール
     </label>
     <div>
       <router-link to="/series" @click.native="setSetting()">決定</router-link>
